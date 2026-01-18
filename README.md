@@ -206,3 +206,29 @@ Résultat : le serveur démarre et répond sur 'http://localhost:3000/' (logs 'G
 ### Conclusion
 Cette étape vise surtout la sécurité et la conformité aux bonnes pratiques. L’impact sur la taille est faible, mais le runtime est moins permissif et donc plus sûr.
 
+---
+
+## Étape 7 — Multi-stage build (séparation deps / runtime)
+
+### But
+Mettre en place une image runtime plus minimale en séparant :
+    l’installation des dépendances (`deps`),
+    l’image finale d’exécution (`runtime`), qui ne contient que le nécessaire.
+
+### Changements réalisés
+Introduction d’un build **multi-stage** :
+    stage `deps` : installation des dépendances de production (`npm install --omit=dev`)
+    stage `runtime` : copie de `node_modules` depuis `deps` + copie uniquement des fichiers nécessaires (`server.js`, `package.json`)
+Image runtime conservée sur une base `node:25.3.0-slim`, avec `NODE_ENV=production`, `USER node` et `EXPOSE 3000`.
+
+### Mesures
+**Image** : `tp-node:etape7`
+**Taille (content size)** : **79.5 MB** (étape 6 : 86.1 MB)
+
+### Vérification de fonctionnement
+Démarrage : `docker run --rm -p 3000:3000 tp-node:etape7`
+Note : un conteneur `tp-node:etape6` tournait encore et occupait le port 3000 (`port is already allocated`).
+  Après arrêt du conteneur (`docker stop ...`), l’image `etape7` démarre correctement et répond sur `http://localhost:3000/` (logs `GET /` observés).
+
+### Conclusion
+Le multi-stage rend l’image finale plus propre et plus proche des pratiques de production : seules les dépendances et fichiers nécessaires à l’exécution sont présents dans l’image runtime, ce qui réduit encore la taille.
