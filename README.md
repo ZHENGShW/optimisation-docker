@@ -130,3 +130,29 @@ La taille totale de l’image reste stable car les couches dominantes proviennen
 
 ### Conclusion
 Cette étape réduit bien la taille des dépendances Node.js (preuve chiffrée via 'docker history'), mais l’impact global sur la taille de l’image est masqué par le poids de l’image de base et des paquets système. Les prochaines étapes cibleront ces sources principales de taille.
+
+---
+
+## Étape 4 — Réduction des paquets système et nettoyage APT
+
+### But
+Réduire la taille de l’image en supprimant les paquets système inutiles et en évitant de conserver le cache APT dans les couches.
+
+### Changements réalisés
+Suppression des paquets non nécessaires au projet ('build-essential', 'locales').
+Conservation de 'ca-certificates' (utile pour les connexions HTTPS/TLS).
+Installation avec '--no-install-recommends'.
+Nettoyage du cache APT dans la même couche : 'rm -rf /var/lib/apt/lists/*'.
+
+### Mesures
+**Image** : 'tp-node:etape4'
+**Taille (content size)** : **411 MB** (étape 3 : 435 MB)
+**Couche APT (docker history)** : **4.1 kB** (étape 3 : 47.7 MB)
+
+### Observations
+La réduction est nette car :
+moins de paquets installés,
+pas de cache APT conservé dans l’image (listes supprimées dans la même couche).
+
+### Conclusion
+Cette étape apporte un gain immédiat de taille et rend l’image plus propre. Les prochaines optimisations viseront surtout l’image de base (remplacer 'node:latest' par une version figée et plus légère).
