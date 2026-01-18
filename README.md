@@ -77,3 +77,32 @@ Les couches lourdes liées à l’image de base 'node:latest' restent inchangée
 ### Conclusion
 Cette étape améliore la propreté du dépôt et réduit fortement le build context.  
 Les optimisations majeures de taille viendront ensuite en modifiant le Dockerfile (suppression de la copie de 'node_modules/', meilleure gestion des dépendances, etc.).
+
+---
+
+## Étape 2 — Suppression de la copie de 'node_modules' et amélioration du cache des dépendances
+
+### But
+Ne plus copier 'node_modules/' depuis la machine hôte (meilleure reproductibilité).
+Améliorer l’utilisation du cache Docker en séparant l’installation des dépendances du reste du code.
+
+### Changements réalisés
+Suppression de 'COPY node_modules ./node_modules' dans le Dockerfile.
+Copie des fichiers 'package.json' / 'package-lock.json' avant l’installation des dépendances ('npm install').
+Le code applicatif est copié après l’installation des dépendances ('COPY . /app'), ce qui permet de réutiliser le cache si seules les sources changent.
+(Préparation) 'node_modules/' peut désormais être ignoré côté Docker (car non requis dans le contexte).
+
+### Mesures
+**Image** : 'tp-node:etape2'
+**Taille (content size)** : **435 MB** (étape 1 : 433 MB ; baseline : 436 MB)
+**Build context transféré** : à renseigner depuis les logs de build (attendu en **kB**, car '.dockerignore' est actif)
+
+### Observations (docker history)
+La couche 'COPY node_modules ...' a disparu.
+L’installation des dépendances via 'RUN npm install' représente désormais **24.8 MB**.
+La copie du code applicatif ('COPY . /app') reste très faible (**69.6 kB**), ce qui confirme que le contexte de build est maîtrisé.
+
+### Conclusion
+Cette étape améliore surtout la reproductibilité et la structure des couches (cache).  
+La réduction de taille plus importante viendra dans les étapes suivantes (dépendances de production uniquement, image de base plus légère, multi-stage, etc.).
+
