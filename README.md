@@ -106,3 +106,27 @@ La copie du code applicatif ('COPY . /app') reste très faible (**69.6 kB**), ce
 Cette étape améliore surtout la reproductibilité et la structure des couches (cache).  
 La réduction de taille plus importante viendra dans les étapes suivantes (dépendances de production uniquement, image de base plus légère, multi-stage, etc.).
 
+---
+
+## Étape 3 — Installation des dépendances de production uniquement
+
+### But
+Réduire la taille des dépendances Node.js dans l’image en excluant les 'devDependencies'.
+
+### Changements réalisés
+Passage à 'NODE_ENV=production'.
+Installation npm en production uniquement : 'npm install --omit=dev'.
+
+### Mesures
+**Image** : 'tp-node:etape3'
+**Taille (content size)** : **435 MB** (étape 2 : 435 MB)
+**Build context transféré** : à renseigner depuis les logs de build (attendu en kB)
+
+### Observations (docker history)
+La couche d’installation des dépendances diminue :
+    Étape 2 : 'npm install' = **24.8 MB**
+    Étape 3 : 'npm install --omit=dev' = **21.5 MB**
+La taille totale de l’image reste stable car les couches dominantes proviennent surtout de l’image de base 'node:latest' et de l’installation des paquets OS ('apt-get ...' = **47.7 MB**).
+
+### Conclusion
+Cette étape réduit bien la taille des dépendances Node.js (preuve chiffrée via 'docker history'), mais l’impact global sur la taille de l’image est masqué par le poids de l’image de base et des paquets système. Les prochaines étapes cibleront ces sources principales de taille.
