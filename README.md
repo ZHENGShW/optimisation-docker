@@ -181,3 +181,28 @@ Les couches applicatives restent du même ordre de grandeur :
 
 ### Conclusion
 Le changement d’image de base est le facteur le plus impactant sur la taille totale. Le fait de versionner l’image ('25.3.0-slim') stabilise également les résultats du build.
+
+---
+
+## Étape 6 — Runtime plus sûr (port minimal et utilisateur non-root)
+
+### But
+Améliorer les bonnes pratiques de sécurité au runtime :
+exposer uniquement le port nécessaire,
+exécuter le processus Node avec un utilisateur non-root.
+
+### Changements réalisés
+'EXPOSE 3000' uniquement (suppression de 4000/5000).
+Exécution avec l’utilisateur 'node' fourni par l’image officielle (au lieu de 'root').
+
+### Mesures
+**Image** : 'tp-node:etape6'
+**Taille (content size)** : **86.1 MB** (étape 5 : 86.1 MB)
+
+### Vérification de fonctionnement
+Démarrage du conteneur : 'docker run --rm -p 3000:3000 tp-node:etape6'
+Résultat : le serveur démarre et répond sur 'http://localhost:3000/' (logs 'GET /' observés).
+
+### Conclusion
+Cette étape vise surtout la sécurité et la conformité aux bonnes pratiques. L’impact sur la taille est faible, mais le runtime est moins permissif et donc plus sûr.
+

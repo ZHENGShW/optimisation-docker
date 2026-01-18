@@ -13,10 +13,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 3000 4000 5000
+EXPOSE 3000
 
 RUN npm run build
 
-USER root
+USER node
 
 CMD ["node", "server.js"]
