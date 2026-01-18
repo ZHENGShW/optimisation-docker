@@ -156,3 +156,28 @@ pas de cache APT conservé dans l’image (listes supprimées dans la même couc
 
 ### Conclusion
 Cette étape apporte un gain immédiat de taille et rend l’image plus propre. Les prochaines optimisations viseront surtout l’image de base (remplacer 'node:latest' par une version figée et plus légère).
+
+---
+
+## Étape 5 — Image de base plus légère et version figée (slim)
+
+### But
+Rendre le build **reproductible** (éviter 'latest').
+Réduire fortement la taille globale en utilisant une variante **slim** de l’image officielle Node.js.
+
+### Changements réalisés
+Remplacement de 'FROM node:latest' par 'FROM node:25.3.0-slim'.
+
+### Mesures
+**Image** : 'tp-node:etape5'
+**Taille (content size)** : **86.1 MB** (étape 4 : 411 MB)
+
+### Observations (docker history)
+La baisse provient majoritairement des couches héritées de l’image de base (variante 'slim' beaucoup plus légère).
+Les couches applicatives restent du même ordre de grandeur :
+    'npm install --omit=dev' : **21.5 MB**
+    couche APT : **10.4 MB**
+    'COPY . /app' : **69.6 kB**
+
+### Conclusion
+Le changement d’image de base est le facteur le plus impactant sur la taille totale. Le fait de versionner l’image ('25.3.0-slim') stabilise également les résultats du build.
