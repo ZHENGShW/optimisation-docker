@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Editor
+.vscode
+.idea
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.*
+
+# OS
+.DS_Store
+
+# Docs / misc
+*.md
